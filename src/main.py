@@ -6,6 +6,9 @@ import mediapipe as mp
 import threading
 from multiprocessing import Queue, Process
 from screeninfo import get_monitors
+import wmi
+import os
+from dotenv import load_dotenv
 
 from spotify_utils.spotify_auth import create_spotify_client
 from spotify_utils.spotify_controller import get_spotify_device_id
@@ -89,6 +92,20 @@ class Pierre:
     
     def setup_pierre_spotify(self):
 
+        load_dotenv()
+
+        wmi_obj = wmi.WMI()
+        spotify_processes = [process for process in wmi_obj.Win32_Process() if process.Name == "Spotify.exe"]
+
+        if spotify_processes == []:
+
+            # Run Spotify Application
+            print("Running Spotify")
+
+            os.startfile(os.getenv('SPOTIFY_PATH'))
+
+
+
         self.spotify_client = create_spotify_client()
         self.spotify_device = get_spotify_device_id(self.spotify_client)
         self.spotify_metadata = {
@@ -120,8 +137,13 @@ class Pierre:
 def main():
 
     pierre_client = Pierre()
+    
     print(pierre_client.hardware_info)
-    mouse_handler(pierre_client)
+        
+    wmi_obj = wmi.WMI()
+    spotify_processes = [process for process in wmi_obj.Win32_Process() if process.Name == "Spotify.exe"]
+    print(spotify_processes)
+    # mouse_handler(pierre_client)
 
 
 if __name__ == '__main__':
